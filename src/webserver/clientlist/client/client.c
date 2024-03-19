@@ -38,7 +38,7 @@ void client_move(client_t* newloc, client_t* oldloc) {
     oldloc->in_buffer_bytes_read = 0;
 }
 
-void client_tick(client_t* this, webserver_t* ws) {
+void client_tick(client_t* this) {
     // Try and read data
     ssize_t read_bytes = read(this->socket, this->in_buffer.buffer + this->in_buffer_bytes_read, this->in_buffer.size - this->in_buffer_bytes_read);
     if (read_bytes > 0) this->in_buffer_bytes_read += read_bytes;
@@ -46,6 +46,7 @@ void client_tick(client_t* this, webserver_t* ws) {
     // If theres a finished request then process it
     char* terminator_ptr = strstr(this->in_buffer.buffer, "\r\n\r\n");
 
+    // If full http request has arrived
     if (terminator_ptr != NULL) {
         // Convert request into owned string excluding the double CRLF terminator
         string_slice_t request_text;
@@ -59,6 +60,19 @@ void client_tick(client_t* this, webserver_t* ws) {
         // Route Request
         http_response_t http_response;
         handle_response(&http_request, &http_response);
+
+        // Set server headers
+        string_slice_t content_length_sl;
+        string_slice_from_static_str(&content_length_sl, "content-length");
+
+        // convert length to string
+        string_slice_t content_length_val_sl;
+        char content_len_str[8] = { 0 };
+        size_t content_len_str_len = sprintf(content_len_str, "%d", http_response.response_body.size);
+        string_slice_create(&content_length_val_sl, content_len_str, content_len_str_len);
+
+        // Add content length header
+        headers_add_header(&http_response.headers, &content_length_sl, &content_length_val_sl);
 
         // Convert http_response_t to buffer_t
         buffer_t response_buffer;

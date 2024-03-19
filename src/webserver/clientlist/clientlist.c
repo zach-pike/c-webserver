@@ -37,8 +37,8 @@ void client_list_remove(client_list_t* this, uint32_t index) {
     this->connected_count -= 1;
 }
 
-void client_list_tick_all(client_list_t* this, webserver_t* ws) {
+void client_list_tick_all(client_list_t* this) {
     for (uint32_t i=0; i<this->connected_count; i++) {
-        client_tick(&this->client_list[i], ws);
+        client_tick(&this->client_list[i]);
     }
 }

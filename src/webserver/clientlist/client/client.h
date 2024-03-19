@@ -3,7 +3,6 @@
 #include <netinet/in.h>
 
 #include "buffer/buffer.h"
-typedef struct webserver webserver_t;
 
 typedef struct client {
     int socket;
@@ -18,4 +17,4 @@ void client_destroy(client_t* this);
 
 void client_move(client_t* newloc, client_t* oldloc);
 
-void client_tick(client_t* this, webserver_t* ws);
+void client_tick(client_t* this);
