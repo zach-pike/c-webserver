@@ -18,7 +18,7 @@ void string_slice_println(const string_slice_t* this) {
     putchar('\n');
 }
 
-void string_slice_from_static_str(string_slice_t* this, const char* str) {
+void string_slice_from_c_str(string_slice_t* this, const char* str) {
     this->string_ptr = str;
     this->length = strlen(str);
 }

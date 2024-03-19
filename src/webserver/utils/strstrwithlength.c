@@ -1,8 +1,8 @@
-#include "strcmpgood.h"
+#include "strstrwithlength.h"
 
 #include <string.h>
 
-const char* strcmpgood(const char* haystack, const char* needle, size_t length) {
+const char* strstr_with_length(const char* haystack, const char* needle, size_t length) {
     size_t needle_length = strlen(needle);
 
     for(size_t i=0; i<length-needle_length; i++) {

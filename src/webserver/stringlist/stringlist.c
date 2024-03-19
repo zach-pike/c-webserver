@@ -103,7 +103,6 @@ void string_list_delete(string_list_t* this, size_t index) {
     this->string_sizes_max_length -= 1;
     this->string_sizes_length -= 1;
     this->string_sizes = (size_t*)realloc((void*)this->string_sizes, this->string_sizes_max_length * sizeof(size_t));
-    
 }
 
 size_t string_list_find(const string_list_t* this, string_slice_t needle, bool ignore_case) {
@@ -114,27 +113,24 @@ size_t string_list_find(const string_list_t* this, string_slice_t needle, bool i
             current_index += this->string_sizes[i];
             continue;
         }
-        
-        if (ignore_case) {
-            bool passed = true;
-            for (size_t i=0; i<needle.length; i++) {
-                char c1 = (this->strings + current_index)[i];
-                char c2 = needle.string_ptr[i];
 
+        bool passed = true;
+        for (size_t i=0; i<needle.length; i++) {
+            char c1 = (this->strings + current_index)[i];
+            char c2 = needle.string_ptr[i];
+
+            if (ignore_case) {
                 if (c1 >= 'a' && c1 <= 'z') c1 -= 32;
                 if (c2 >= 'a' && c2 <= 'z') c2 -= 32;
-
-                if (c1 != c2) {
-                    passed = false;
-                    break;
-                }
             }
 
-            if (passed) return i;
-
-        } else {
-            if (memcmp(this->strings + current_index, needle.string_ptr, needle.length) == 0) return i;
+            if (c1 != c2) {
+                passed = false;
+                break;
+            }
         }
+        
+        if (passed) return i;
 
         current_index += this->string_sizes[i];
     }

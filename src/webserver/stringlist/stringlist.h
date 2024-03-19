@@ -1,10 +1,10 @@
 #pragma once
 
-#include "stringslice/stringslice.h"
-
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
+
+#include "stringslice/stringslice.h"
 
 typedef struct string_list {
     char* strings;

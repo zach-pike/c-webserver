@@ -2,14 +2,14 @@
 
 #include <stdio.h>
 
-#include "utils/strcmpgood.h"
+#include "utils/strstrwithlength.h"
 #include "utils/strcmpnocase.h"
 
 void http_request_from_text(http_request_t* this, const string_slice_t* text) {
     // Parse request line
 
     // Find first CRLF
-    const char* crlf = strcmpgood(text->string_ptr, "\r\n", text->length);
+    const char* crlf = strstr_with_length(text->string_ptr, "\r\n", text->length);
     bool hasHeaders = true;
 
     if (crlf == NULL) { 
@@ -22,13 +22,13 @@ void http_request_from_text(http_request_t* this, const string_slice_t* text) {
 
     // Get request verb
     string_slice_t request_verb;
-    const char* verb_end = strcmpgood(text->string_ptr, " ", line_length);
+    const char* verb_end = strstr_with_length(text->string_ptr, " ", line_length);
     size_t verb_length = verb_end - text->string_ptr;
     string_slice_create(&request_verb, text->string_ptr, verb_length);
 
     // get path
     string_slice_t request_path;
-    const char* path_end = strcmpgood(verb_end + 1, " ", line_length - verb_length - 1);
+    const char* path_end = strstr_with_length(verb_end + 1, " ", line_length - verb_length - 1);
     size_t path_length = path_end - verb_end - 1;
     string_slice_create(&request_path, verb_end + 1, path_length);
 
@@ -68,13 +68,10 @@ void http_request_destroy(http_request_t* this) {
     headers_destroy(&this->headers);
 }
 
-
 void http_response_initialize(http_response_t* this, uint16_t code, allocated_string_t* message, buffer_t* body) {
     this->code = code;
     allocated_string_move(&this->message, message);
-
     headers_initialize(&this->headers);
-
     buffer_move(&this->response_body, body);
 }
 
@@ -136,7 +133,7 @@ void http_response_to_buffer(const http_response_t* this, buffer_t* buffer) {
     // inserting a crlf so we only need to add 1 more
 
     string_slice_t crlf_ss;
-    string_slice_from_static_str(&crlf_ss, "\r\n");
+    string_slice_from_c_str(&crlf_ss, "\r\n");
 
     // Concat with response data
     buffer_append_string_slice(buffer, crlf_ss);

@@ -1,6 +1,6 @@
 #include "headers.h"
 
-#include "utils/strcmpgood.h"
+#include "utils/strstrwithlength.h"
 
 #include <stdbool.h>
 #include <string.h>
@@ -22,7 +22,7 @@ void headers_initialize_from_text(headers_t* this, string_slice_t text) {
     bool finished = false;
 
     while (true) {
-        const char* crlf = strcmpgood(read_ptr, "\r\n", text.length - (read_ptr - text.string_ptr));
+        const char* crlf = strstr_with_length(read_ptr, "\r\n", text.length - (read_ptr - text.string_ptr));
 
         size_t line_length = crlf - read_ptr;
 
@@ -33,7 +33,7 @@ void headers_initialize_from_text(headers_t* this, string_slice_t text) {
 
         // Find :
 
-        const char* colon = strcmpgood(read_ptr, ":", line_length);
+        const char* colon = strstr_with_length(read_ptr, ":", line_length);
 
         size_t key_length = colon - read_ptr;
         // printf("%c\n", *colon);
@@ -52,7 +52,7 @@ void headers_initialize_from_text(headers_t* this, string_slice_t text) {
         string_slice_trim(&key_slice);
         string_slice_trim(&value_slice);
         
-        headers_add_header(this, &key_slice, &value_slice);
+        headers_add(this, &key_slice, &value_slice);
 
         read_ptr = crlf + 2;
 
@@ -60,20 +60,20 @@ void headers_initialize_from_text(headers_t* this, string_slice_t text) {
     }
 }
 
-void headers_add_header(headers_t* this, const string_slice_t* key, const string_slice_t* value) {
+void headers_add(headers_t* this, const string_slice_t* key, const string_slice_t* value) {
     string_list_add(&this->header_keys, key);
     string_list_add(&this->header_values, value);
 }
 
-void headers_add_header_static_str(headers_t* this, const char* key, const char* value) {
+void headers_add_c_str(headers_t* this, const char* key, const char* value) {
     string_slice_t key_slice;
     string_slice_t value_slice;
-    string_slice_from_static_str(&key_slice, key);
-    string_slice_from_static_str(&value_slice, value);
-    headers_add_header(this, &key_slice, &value_slice);
+    string_slice_from_c_str(&key_slice, key);
+    string_slice_from_c_str(&value_slice, value);
+    headers_add(this, &key_slice, &value_slice);
 }
 
-void headers_delete_header(headers_t* this, string_slice_t key) {
+void headers_delete(headers_t* this, string_slice_t key) {
     size_t idx = string_list_find(&this->header_keys, key, true);
 
     if (idx != -1) {
@@ -82,16 +82,16 @@ void headers_delete_header(headers_t* this, string_slice_t key) {
     }
 }
 
-void headers_get_header(const headers_t* this, string_slice_t key, string_slice_t* value) {
+void headers_get(const headers_t* this, string_slice_t key, string_slice_t* value) {
     size_t idx = string_list_find(&this->header_keys, key, true);
 
     if (idx != -1)
         string_list_get(&this->header_values, value, idx);
 }
 
-void headers_get_header_by_static_str(const headers_t* this, const char* str, string_slice_t* value) {
+void headers_get_by_c_str(const headers_t* this, const char* str, string_slice_t* value) {
     string_slice_t key;
-    string_slice_from_static_str(&key, str);
+    string_slice_from_c_str(&key, str);
 
     size_t idx = string_list_find(&this->header_keys, key, true);
 
@@ -105,7 +105,7 @@ void headers_get_by_index(const headers_t* this, size_t idx, string_slice_t* key
     string_list_get(&this->header_values, value, idx);
 }
 
-bool headers_has_header(const headers_t* this, string_slice_t key) {
+bool headers_exists(const headers_t* this, string_slice_t key) {
     size_t idx = string_list_find(&this->header_keys, key, true);
     return idx != -1;
 }

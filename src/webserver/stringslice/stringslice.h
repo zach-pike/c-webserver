@@ -10,10 +10,13 @@ typedef struct string_slice {
 // Does not own memory so does not need to be destroyed
 void string_slice_create(string_slice_t* this, const char* data, size_t length);
 
+// Print string slice (encases in quotes)
 void string_slice_println(const string_slice_t* this);
 
-void string_slice_from_static_str(string_slice_t* this, const char* str);
+// Create a string slice from a C string
+void string_slice_from_c_str(string_slice_t* this, const char* str);
 
+// Whitespace trimming functions
 void string_slice_ltrim(string_slice_t* this);
 void string_slice_rtrim(string_slice_t* this);
 void string_slice_trim(string_slice_t* this);

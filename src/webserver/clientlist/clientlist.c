@@ -10,6 +10,8 @@ void client_list_initialize(client_list_t* this) {
 }
 
 void client_list_destroy(client_list_t* this) {
+    if (this->client_list == NULL) return;
+
     // Destroy all elements 
     for (uint32_t i=0; i<this->connected_count; i++) {
         client_destroy(&this->client_list[i]);
@@ -19,7 +21,15 @@ void client_list_destroy(client_list_t* this) {
     this->client_list = NULL;
 }
 
+void _client_list_realloc(client_list_t* this) {
+    this->max_size += 10;
+    this->client_list = (client_t*)realloc((void*)this->client_list, sizeof(client_t)*this->max_size);
+}
+
 uint32_t client_list_add(client_list_t* this, client_t* client_to_add) {
+    // Resize if needed
+    if (this->connected_count == (this->max_size - 1)) _client_list_realloc(this);
+
     client_move(&this->client_list[this->connected_count], client_to_add);
 
     this->connected_count += 1;

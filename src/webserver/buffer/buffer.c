@@ -1,7 +1,6 @@
 #include "buffer.h"
 
 #include <stdlib.h>
-
 #include <string.h>
 
 void buffer_initialize(buffer_t* this, uint32_t size) {
@@ -10,6 +9,8 @@ void buffer_initialize(buffer_t* this, uint32_t size) {
 }
 
 void buffer_destroy(buffer_t* this) {
+    if (this->buffer == NULL) return;
+    
     free((void*)this->buffer);
 
     this->buffer = NULL;

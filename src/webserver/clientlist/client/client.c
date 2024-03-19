@@ -7,7 +7,6 @@
 
 #include "allocatedstring/allocatedstring.h"
 #include "httptypes/httptypes.h"
-
 #include "handle/handle.h"
 
 void client_initialize(client_t* this, int socket, struct sockaddr_in address) {
@@ -63,7 +62,7 @@ void client_tick(client_t* this) {
 
         // Set server headers
         string_slice_t content_length_sl;
-        string_slice_from_static_str(&content_length_sl, "content-length");
+        string_slice_from_c_str(&content_length_sl, "content-length");
 
         // convert length to string
         string_slice_t content_length_val_sl;
@@ -72,7 +71,7 @@ void client_tick(client_t* this) {
         string_slice_create(&content_length_val_sl, content_len_str, content_len_str_len);
 
         // Add content length header
-        headers_add_header(&http_response.headers, &content_length_sl, &content_length_val_sl);
+        headers_add(&http_response.headers, &content_length_sl, &content_length_val_sl);
 
         // Convert http_response_t to buffer_t
         buffer_t response_buffer;

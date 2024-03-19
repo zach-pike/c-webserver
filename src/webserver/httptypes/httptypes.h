@@ -5,16 +5,19 @@
 #include "allocatedstring/allocatedstring.h"
 #include "buffer/buffer.h"
 
+// Request type
 typedef enum http_verb {
     get,
     post
 } http_verb_t;
 
+// http version
 typedef enum http_version {
     http11,
     http2
 } http_version_t;
 
+// Request data struct
 typedef struct http_request {
     // Request line data
     http_verb_t verb;
@@ -23,8 +26,12 @@ typedef struct http_request {
 
     // Header data
     headers_t headers;
+
+    // TBI...
+    buffer_t request_body;
 } http_request_t;
 
+// Create http request object from message
 void http_request_from_text(http_request_t* this, const string_slice_t* text);
 
 void http_request_destroy(http_request_t* this);
