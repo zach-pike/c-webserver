@@ -12,11 +12,8 @@ void handle_response(const http_request_t* request, http_response_t* response) {
     allocated_string_from_str(&response_message, "OK");
 
     // Read user agent
-    string_slice_t ua_key;
-    string_slice_from_static_str(&ua_key, "user-agent");
-
     string_slice_t ua;
-    headers_get_header(&request->headers, ua_key, &ua);
+    headers_get_header_by_static_str(&request->headers, "user-agent", &ua);
 
     // response data
     allocated_string_t main_content;

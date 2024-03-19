@@ -89,6 +89,17 @@ void headers_get_header(const headers_t* this, string_slice_t key, string_slice_
         string_list_get(&this->header_values, value, idx);
 }
 
+void headers_get_header_by_static_str(const headers_t* this, const char* str, string_slice_t* value) {
+    string_slice_t key;
+    string_slice_from_static_str(&key, str);
+
+    size_t idx = string_list_find(&this->header_keys, key, true);
+
+    if (idx != -1)
+        string_list_get(&this->header_values, value, idx);
+}
+
+
 void headers_get_by_index(const headers_t* this, size_t idx, string_slice_t* key, string_slice_t* value) {
     string_list_get(&this->header_keys, key, idx);
     string_list_get(&this->header_values, value, idx);

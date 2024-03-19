@@ -21,6 +21,7 @@ void headers_add_header_static_str(headers_t* this, const char* key, const char*
 
 void headers_delete_header(headers_t* this, string_slice_t key);
 void headers_get_header(const headers_t* this, string_slice_t key, string_slice_t* value);
+void headers_get_header_by_static_str(const headers_t* this, const char* str, string_slice_t* value);
 
 void headers_get_by_index(const headers_t* this, size_t idx, string_slice_t* key, string_slice_t* value);
 
