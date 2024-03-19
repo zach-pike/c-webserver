@@ -83,40 +83,19 @@ void http_response_destroy(http_response_t* this) {
 
 // Create buffer from http response
 void http_response_to_buffer(const http_response_t* this, buffer_t* buffer) {
-    // REQUEST LINE
-    // 8 is http/1.1
-    // 1 is space
-    // 3 is 3 digit code
-    // 1 is space
-    // this->message.string_buffer.size is status code size
-    // 2 is crlf
-    size_t response_line_length = 8 + 1 + 3 + 1 + this->message.string_buffer.size + 2;
+    const char* fmt = "HTTP/1.1 %d %s\r\n";
+
+    size_t response_line_length = snprintf(NULL, 0, fmt, this->code, this->message.string_buffer.buffer);
 
     // Create initial the buffer
-    buffer_initialize(buffer, response_line_length);
+    buffer_t request_line_buffer;
+    buffer_initialize(&request_line_buffer, response_line_length + 1);
 
-    // insert the request line
-    const char* http_version = "HTTP/1.1";
-    memcpy(buffer->buffer, http_version, 8);
+    // Write into buffer
+    sprintf(request_line_buffer.buffer, fmt, this->code, this->message.string_buffer.buffer);
 
-    // insert space
-    // 8 is to put it after the 8 chars of "HTTP/1.1"
-    buffer->buffer[8] = ' ';
-
-    // Inserts code
-    sprintf(buffer->buffer + 8 + 1, "%d", this->code);
-
-    // insert space
-    // 8 is to put it after the 8 chars of "HTTP/1.1"
-    // 1 is for space
-    // 3 is for status code
-    buffer->buffer[8 + 1 + 3] = ' ';
-
-    // inserts status messand then a CRLF
-    memcpy(buffer->buffer + 8 + 1 + 3 + 1, this->message.string_buffer.buffer,this->message.string_buffer.size);
-
-    // Add line end
-    memcpy(buffer->buffer + response_line_length - 2, "\r\n", 2);
+    // Move request line to buffer
+    buffer_move(buffer, &request_line_buffer);
 
     // insert headers
 
