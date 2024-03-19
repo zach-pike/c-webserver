@@ -2,6 +2,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include "utils/strcmpnocase.h"
 
 #define STRINGS_REALLOC_SIZE 32 // Number of bytes to extend strings list on realloc
 #define STRING_SIZES_REALLOC_SIZE 4 // Number of elements to extend string lengths list by
@@ -105,15 +106,35 @@ void string_list_delete(string_list_t* this, size_t index) {
     
 }
 
-size_t string_list_find(const string_list_t* this, string_slice_t needle) {
+size_t string_list_find(const string_list_t* this, string_slice_t needle, bool ignore_case) {
     size_t current_index = 0;
 
     for (size_t i=0; i<this->string_sizes_length; i++) {
-        if (this->string_sizes[i] != needle.length) continue;
+        if (this->string_sizes[i] != needle.length) {
+            current_index += this->string_sizes[i];
+            continue;
+        }
+        
+        if (ignore_case) {
+            bool passed = true;
+            for (size_t i=0; i<needle.length; i++) {
+                char c1 = (this->strings + current_index)[i];
+                char c2 = needle.string_ptr[i];
 
-        // printf("shoud br 1ce\n");
+                if (c1 >= 'a' && c1 <= 'z') c1 -= 32;
+                if (c2 >= 'a' && c2 <= 'z') c2 -= 32;
 
-        if (memcmp(this->strings + current_index, needle.string_ptr, needle.length) == 0) return i;
+                if (c1 != c2) {
+                    passed = false;
+                    break;
+                }
+            }
+
+            if (passed) return i;
+
+        } else {
+            if (memcmp(this->strings + current_index, needle.string_ptr, needle.length) == 0) return i;
+        }
 
         current_index += this->string_sizes[i];
     }

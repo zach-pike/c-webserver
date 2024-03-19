@@ -4,6 +4,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 typedef struct string_list {
     char* strings;
@@ -27,7 +28,7 @@ void string_list_delete(string_list_t* this, size_t index);
 void string_list_get(const string_list_t* this, string_slice_t* val, size_t index);
 
 // Returns -1 on not found
-size_t string_list_find(const string_list_t* this, string_slice_t needle);
+size_t string_list_find(const string_list_t* this, string_slice_t needle, bool ignore_case);
 
 size_t string_list_get_length(const string_list_t* this);
 
