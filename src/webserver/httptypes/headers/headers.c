@@ -65,8 +65,16 @@ void headers_add_header(headers_t* this, const string_slice_t* key, const string
     string_list_add(&this->header_values, value);
 }
 
+void headers_add_header_static_str(headers_t* this, const char* key, const char* value) {
+    string_slice_t key_slice;
+    string_slice_t value_slice;
+    string_slice_from_static_str(&key_slice, key);
+    string_slice_from_static_str(&value_slice, value);
+    headers_add_header(this, &key_slice, &value_slice);
+}
+
 void headers_delete_header(headers_t* this, string_slice_t key) {
-    size_t idx = string_list_find(&this->header_keys, key);
+    size_t idx = string_list_find(&this->header_keys, key, true);
 
     if (idx != -1) {
         string_list_delete(&this->header_keys, idx);
@@ -75,7 +83,7 @@ void headers_delete_header(headers_t* this, string_slice_t key) {
 }
 
 void headers_get_header(const headers_t* this, string_slice_t key, string_slice_t* value) {
-    size_t idx = string_list_find(&this->header_keys, key);
+    size_t idx = string_list_find(&this->header_keys, key, true);
 
     if (idx != -1)
         string_list_get(&this->header_values, value, idx);
@@ -87,7 +95,7 @@ void headers_get_by_index(const headers_t* this, size_t idx, string_slice_t* key
 }
 
 bool headers_has_header(const headers_t* this, string_slice_t key) {
-    size_t idx = string_list_find(&this->header_keys, key);
+    size_t idx = string_list_find(&this->header_keys, key, true);
     return idx != -1;
 }
 
@@ -122,6 +130,7 @@ void headers_to_buffer(const headers_t* this, buffer_t* buffer) {
 
         headers_get_by_index(this, i, &key, &value);
 
+        // kms
         memcpy(buffer->buffer + char_idx, key.string_ptr, key.length);
         memcpy(buffer->buffer + char_idx + key.length, ": ", 2);
         memcpy(buffer->buffer + char_idx + key.length + 2, value.string_ptr, value.length);
