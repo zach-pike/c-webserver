@@ -27,7 +27,7 @@ void webserver_initialize(webserver_t* ws, const char* host, uint16_t port) {
         exit(EXIT_FAILURE);
     }
 
-    // Forcefully attaching socket to the port 8080
+    // Forcefully attaching socket to the port
     int opt = 1;
     if (setsockopt(ws->socket, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) {
         perror("setsockopt");
@@ -48,6 +48,7 @@ void webserver_initialize(webserver_t* ws, const char* host, uint16_t port) {
         exit(EXIT_FAILURE);
     }
 
+    // Set socket to no blocking
     set_socket_blocking_enabled(ws->socket, 0);
 }
 
@@ -62,6 +63,7 @@ void webserver_tick(webserver_t* this) {
     struct sockaddr_in connection_address;
     int new_socket = accept(this->socket, (struct sockaddr*)&connection_address, &addrlen);
 
+    // If new user accepted
     if (new_socket != -1) {
         // Accepted new user!
         client_t client;
@@ -70,5 +72,5 @@ void webserver_tick(webserver_t* this) {
     }
 
     // Tick all the clients
-    client_list_tick_all(&this->clientlist, this);
+    client_list_tick_all(&this->clientlist);
 }

@@ -7,32 +7,25 @@
 static const char* DATA = "<p>Hello World</p><h1>aa</h1>";
 
 void handle_response(const http_request_t* request, http_response_t* response) {
-    allocated_string_t message;
-    allocated_string_from_ptr(&message, "OK", 2);
+    // response code
+    allocated_string_t response_message;
+    allocated_string_from_str(&response_message, "OK");
 
+    // Read user agent
+    string_slice_t ua_key;
+    string_slice_from_static_str(&ua_key, "user-agent");
+
+    string_slice_t ua;
+    headers_get_header(&request->headers, ua_key, &ua);
+
+    // response data
     allocated_string_t main_content;
-    allocated_string_from_ptr(&main_content, DATA, strlen(DATA));
+    allocated_string_from_ptr(&main_content, ua.string_ptr, ua.length);
 
-    // Create the response
-    http_response_initialize(response, 200, &message, &main_content.string_buffer);
+    // Create the response object (takes ownership of response
+    http_response_initialize(response, 200, &response_message, &main_content.string_buffer);
 
     // Set headers
-    string_slice_t content_length_sl;
-    string_slice_from_static_str(&content_length_sl, "content-length");
-
-    // convert length to string
-    string_slice_t content_length_val_sl;
-    char content_len_str[5] = { 0 };
-    size_t content_len_str_len = sprintf(content_len_str, "%d", response->response_body.size);
-    string_slice_create(&content_length_val_sl, content_len_str, content_len_str_len);
-
-    // Add content length header
-    headers_add_header(&response->headers, &content_length_sl, &content_length_val_sl);
-
     // Add content type header
-    string_slice_t content_type_sl;
-    string_slice_t content_type_val_sl;
-    string_slice_from_static_str(&content_type_sl, "content-type");
-    string_slice_from_static_str(&content_type_val_sl, "text/html");
-    headers_add_header(&response->headers, &content_type_sl, &content_type_val_sl);
+    headers_add_header_static_str(&response->headers, "content-type", "text/html");
 }
