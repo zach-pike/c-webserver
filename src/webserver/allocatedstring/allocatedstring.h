@@ -13,4 +13,6 @@ void allocated_string_from_ptr(allocated_string_t* this, const char* ptr, size_t
 
 void allocated_string_destroy(allocated_string_t* this);
 
+size_t allocated_string_length(allocated_string_t* this);
+
 void allocated_string_move(allocated_string_t* newloc, allocated_string_t* oldloc);
