@@ -56,22 +56,55 @@ void client_tick(client_t* this) {
         http_request_t http_request;
         http_request_from_text(&http_request, &request_text);
 
+        // Read body into buffer_t in request object now that content-length has been read
+        if (headers_exists_c_str(&http_request.headers, "content-length")) {
+            string_slice_t content_length_slice;
+            headers_get_by_c_str(&http_request.headers, "content-length", &content_length_slice);
+
+            // If we have a content length then we have more data to read
+            // read length and create a buffer
+            size_t body_length = string_slice_parse_size_t(&content_length_slice);
+
+            buffer_t body_buffer;
+            buffer_initialize(&body_buffer, body_length);
+
+            // Copy over any read body data into new buffer
+            size_t body_read_length = this->in_buffer_bytes_read - (request_text_length + 4);
+            memcpy(body_buffer.buffer, terminator_ptr + 4, body_read_length);
+
+            // Read rest of data into new buffer
+            while (body_read_length < body_length) {
+                size_t b = read(this->socket, body_buffer.buffer + body_read_length, body_length - body_read_length);
+                if (b > 0) body_read_length += b;
+            }
+
+            // attach buffer to request object
+            buffer_move(&http_request.request_body, &body_buffer);
+        } else {
+            // If buffer isnt used then mark as uninitialized
+            buffer_mark_uninitialized(&http_request.request_body);
+        }
+
         // Route Request
         http_response_t http_response;
         handle_response(&http_request, &http_response);
 
         // Set server headers
-        string_slice_t content_length_sl;
-        string_slice_from_c_str(&content_length_sl, "content-length");
 
-        // convert length to string
-        string_slice_t content_length_val_sl;
-        char content_len_str[8] = { 0 };
-        size_t content_len_str_len = sprintf(content_len_str, "%d", http_response.response_body.size);
-        string_slice_create(&content_length_val_sl, content_len_str, content_len_str_len);
+        // Set content-length header if buffer not uninitialized
+        if (!buffer_is_uninitialized(&http_response.response_body)) {
+            string_slice_t content_length_sl;
+            string_slice_from_c_str(&content_length_sl, "content-length");
 
-        // Add content length header
-        headers_add(&http_response.headers, &content_length_sl, &content_length_val_sl);
+            // convert length to string
+            string_slice_t content_length_val_sl;
+            char content_len_str[8] = { 0 };
+            size_t content_len_str_len = sprintf(content_len_str, "%d", http_response.response_body.size);
+            string_slice_create(&content_length_val_sl, content_len_str, content_len_str_len);
+
+            // Add content length header
+            headers_add(&http_response.headers, &content_length_sl, &content_length_val_sl);
+        }
 
         // Convert http_response_t to buffer_t
         buffer_t response_buffer;

@@ -110,6 +110,13 @@ bool headers_exists(const headers_t* this, string_slice_t key) {
     return idx != -1;
 }
 
+bool headers_exists_c_str(const headers_t* this, const char* key) {
+    string_slice_t key_slice;
+    string_slice_from_c_str(&key_slice, key);
+
+    size_t idx = string_list_find(&this->header_keys, key_slice, true);
+    return idx != -1;
+}
 
 void headers_to_buffer(const headers_t* this, buffer_t* buffer) {
     // HEADERS

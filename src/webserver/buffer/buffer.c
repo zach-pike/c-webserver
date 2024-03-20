@@ -17,6 +17,20 @@ void buffer_destroy(buffer_t* this) {
     this->size = 0;
 }
 
+void buffer_mark_uninitialized(buffer_t* this) {
+    this->buffer = NULL;
+    this->size = 0;
+}
+
+bool buffer_is_uninitialized(const buffer_t* this) {
+    return this->buffer == NULL;
+}
+
+void buffer_realloc(buffer_t* this, size_t new_size) {
+    this->buffer = (uint8_t*)realloc((void*)this->buffer, new_size);
+    this->size = new_size;
+}
+
 void buffer_zero(buffer_t* this) {
     memset(this->buffer, 0, this->size);
 }

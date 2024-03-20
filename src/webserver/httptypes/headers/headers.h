@@ -30,6 +30,7 @@ void headers_get_by_index(const headers_t* this, size_t idx, string_slice_t* key
 
 // Returns true if header exists
 bool headers_exists(const headers_t* this, string_slice_t key);
+bool headers_exists_c_str(const headers_t* this, const char* key);
 
 // Stringify headers to buffer
 void headers_to_buffer(const headers_t* this, buffer_t* buffer);

@@ -66,6 +66,7 @@ void http_request_from_text(http_request_t* this, const string_slice_t* text) {
 
 void http_request_destroy(http_request_t* this) {
     headers_destroy(&this->headers);
+    buffer_destroy(&this->request_body);
 }
 
 void http_response_initialize(http_response_t* this, uint16_t code, allocated_string_t* message, buffer_t* body) {
@@ -94,9 +95,12 @@ void http_response_to_buffer(const http_response_t* this, buffer_t* buffer) {
     // Write into buffer
     sprintf(request_line_buffer.buffer, fmt, this->code, this->message.string_buffer.buffer);
 
+    // Shrink buffer by 1 byte to get rid of null
+    // Hacky fix unnessary realloc
+    buffer_realloc(&request_line_buffer, request_line_buffer.size - 1);
+
     // Move request line to buffer
     buffer_move(buffer, &request_line_buffer);
-
     // insert headers
 
     // Stringified headers
@@ -117,6 +121,7 @@ void http_response_to_buffer(const http_response_t* this, buffer_t* buffer) {
     // Concat with response data
     buffer_append_string_slice(buffer, crlf_ss);
 
-    //insert body data
-    buffer_concat(buffer, &this->response_body);
+    //insert body data if is initialised
+    if (!buffer_is_uninitialized(&this->response_body))
+        buffer_concat(buffer, &this->response_body);
 }

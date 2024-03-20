@@ -16,6 +16,8 @@ void string_slice_println(const string_slice_t* this);
 // Create a string slice from a C string
 void string_slice_from_c_str(string_slice_t* this, const char* str);
 
+size_t string_slice_parse_size_t(const string_slice_t* this);
+
 // Whitespace trimming functions
 void string_slice_ltrim(string_slice_t* this);
 void string_slice_rtrim(string_slice_t* this);
